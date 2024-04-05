@@ -127,6 +127,7 @@ export default function Cloudflare() {
 					<p>request cost: ${cfRequestCost().toFixed(2)} </p>
 					<p>duration cost: ${cfDurationCost().toFixed(2)} </p>
 					<p>${cfCost().toFixed(2)} /month</p>
+					<p>${(cfCost() / playerCount()).toFixed(2)} /player</p>
 					{/* <p>${parseFloat((cfCost() * 12).toFixed(2))} /year</p> */}
 				</div>
 				<div>
@@ -134,6 +135,7 @@ export default function Cloudflare() {
 					<p>ccu cost: ${unityCCUCost().toFixed(2)} </p>
 					<p>bandwith cost: ${unityBandwidthCost().toFixed(2)}</p>
 					<p>${unityCost().toFixed(2)} /month</p>
+					<p>${(unityCost() / playerCount()).toFixed(2)} /player</p>
 					{/* <p>${parseFloat((unityCost() * 12).toFixed(2))} /year</p> */}
 				</div>
 			</div>

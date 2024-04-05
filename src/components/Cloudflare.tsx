@@ -9,8 +9,13 @@ export default function Cloudflare() {
 	const [requestPerPlayer, setRequestPerPlayer] = createSignal(1);
 	const [processTimePerRequest, setProcessTimePerRequest] = createSignal(10);
 
-	const [cfCost, setCfCost] = createSignal(0);
-	const [unityCost, setUnityCost] = createSignal(0);
+	const [cfRequestCost, setCfRequestCost] = createSignal(0);
+	const [cfDurationCost, setCfDurationCost] = createSignal(0);
+	const [unityCCUCost, setUnityCCUCost] = createSignal(0);
+	const [unityBandwidthCost, setUnityBandwidthCost] = createSignal(0);
+
+	const cfCost = () => cfRequestCost() + cfDurationCost();
+	const unityCost = () => unityCCUCost() + unityBandwidthCost();
 
 	const handlePlayerChange = (value: number) => {
 		setPlayerCount(value);
@@ -19,11 +24,10 @@ export default function Cloudflare() {
 			averagePlayTime(),
 			requestPerPlayer()
 		);
-		const cfCost = calculateCFCost(requestCount, processTimePerRequest());
-		setRequestCount(requestCount);
-		setCfCost(cfCost);
+		calculateCFCost(requestCount, processTimePerRequest());
+		calculateUnityCost(requestCount);
 
-		const unityCost = calculateUnityCost(requestCount);
+		setRequestCount(requestCount);
 	};
 
 	const calculateRequestCount = (
@@ -33,7 +37,7 @@ export default function Cloudflare() {
 	) => {
 		return Math.ceil(
 			(playerCount * averagePlayTime * requestPerPlayer * 3600) /
-				10_000_000
+				1_000_000
 		);
 	};
 
@@ -41,7 +45,8 @@ export default function Cloudflare() {
 		requestCount: number,
 		processTimePerRequest: number
 	) => {
-		const requestCost = requestCount > 1 ? (requestCount - 1) * 0.15 : 0;
+		const requestCost =
+			requestCount > 1 ? ((requestCount - 1) * 0.15) / 10 : 0;
 
 		const durationUnits = (processTimePerRequest * requestCount * 1000) / 8;
 		const durationCost =
@@ -49,7 +54,8 @@ export default function Cloudflare() {
 				? ((durationUnits - 400_000) * 12.5) / 1_000_000
 				: 0;
 
-		return requestCost + durationCost;
+		setCfRequestCost(requestCost);
+		setCfDurationCost(durationCost);
 	};
 
 	const calculateUnityCost = (requestCount: number) => {
@@ -67,7 +73,8 @@ export default function Cloudflare() {
 			console.log(bandwithCost, bandwithGib);
 		}
 
-		setUnityCost(timeCost + bandwithCost);
+		setUnityCCUCost(timeCost);
+		setUnityBandwidthCost(bandwithCost);
 	};
 
 	return (
@@ -115,19 +122,19 @@ export default function Cloudflare() {
 					"--justify-content": "center",
 				})}
 			>
-				<div
-					style={css({
-						"--width": 30,
-					})}
-				>
+				<div>
 					<p>Cloudflare</p>
+					<p>request cost: ${cfRequestCost().toFixed(2)} </p>
+					<p>duration cost: ${cfDurationCost().toFixed(2)} </p>
 					<p>${cfCost().toFixed(2)} /month</p>
-					<p>${parseFloat((cfCost() * 12).toFixed(2))} /year</p>
+					{/* <p>${parseFloat((cfCost() * 12).toFixed(2))} /year</p> */}
 				</div>
 				<div>
 					<p>Unity Relay</p>
+					<p>ccu cost: ${unityCCUCost().toFixed(2)} </p>
+					<p>bandwith cost: ${unityBandwidthCost().toFixed(2)}</p>
 					<p>${unityCost().toFixed(2)} /month</p>
-					<p>${parseFloat((unityCost() * 12).toFixed(2))} /year</p>
+					{/* <p>${parseFloat((unityCost() * 12).toFixed(2))} /year</p> */}
 				</div>
 			</div>
 		</div>

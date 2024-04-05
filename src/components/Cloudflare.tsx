@@ -22,6 +22,8 @@ export default function Cloudflare() {
 		const cfCost = calculateCFCost(requestCount, processTimePerRequest());
 		setRequestCount(requestCount);
 		setCfCost(cfCost);
+
+		const unityCost = calculateUnityCost(requestCount);
 	};
 
 	const calculateRequestCount = (
@@ -30,7 +32,8 @@ export default function Cloudflare() {
 		requestPerPlayer: number
 	) => {
 		return Math.ceil(
-			(playerCount * averagePlayTime * requestPerPlayer * 60) / 10_000_000
+			(playerCount * averagePlayTime * requestPerPlayer * 3600) /
+				10_000_000
 		);
 	};
 
@@ -41,7 +44,6 @@ export default function Cloudflare() {
 		const requestCost = requestCount > 1 ? (requestCount - 1) * 0.15 : 0;
 
 		const durationUnits = (processTimePerRequest * requestCount * 1000) / 8;
-		console.log(durationUnits);
 		const durationCost =
 			durationUnits > 400_000
 				? ((durationUnits - 400_000) * 12.5) / 1_000_000
@@ -50,22 +52,23 @@ export default function Cloudflare() {
 		return requestCost + durationCost;
 	};
 
-	createEffect(() => {
-		let totalTime = averagePlayTime() * playerCount() * 60;
-
-		let requestCost = (requestCount() - 1) * 0.15;
-		if (requestCost < 0) requestCost = 0;
-
-		requestCost = parseFloat(requestCost.toFixed(2));
-		setCfCost(requestCost);
+	const calculateUnityCost = (requestCount: number) => {
+		const totalTime = averagePlayTime() * playerCount() * 60;
 
 		let billableTime = totalTime - 2_160_000;
 		if (billableTime < 0) billableTime = 0;
 
-		let unityCost = (billableTime * 0.16) / 43_200;
-		unityCost = parseFloat(unityCost.toFixed(2));
-		setUnityCost(unityCost);
-	});
+		const timeCost = (billableTime * 0.16) / 43_200;
+		let bandwithGib = requestCount;
+		let bandwithCost = 0;
+		if (bandwithGib < 150) bandwithGib = 0;
+		else {
+			bandwithCost = (bandwithGib - 150) * 0.16;
+			console.log(bandwithCost, bandwithGib);
+		}
+
+		setUnityCost(timeCost + bandwithCost);
+	};
 
 	return (
 		<div>
@@ -81,11 +84,12 @@ export default function Cloudflare() {
 				setVaule={setAveragePlayTime}
 				label="Avg Playtime (hours)"
 				minValue={1}
+				maxValue={20}
 			/>
 			<Slider
 				value={requestPerPlayer()}
 				setVaule={setRequestPerPlayer}
-				label="Requests/player/min"
+				label="Requests/player/sec"
 				minValue={1}
 				maxValue={60}
 			/>
@@ -94,14 +98,14 @@ export default function Cloudflare() {
 				setVaule={setProcessTimePerRequest}
 				label="Process time (ms)"
 				minValue={1}
-				maxValue={1000}
+				maxValue={100}
 			/>
 			<Slider
 				value={requestCount()}
 				setVaule={setRequestCount}
 				label="Requests (millions)"
 				minValue={1}
-				maxValue={10000}
+				maxValue={100000}
 			/>
 
 			<div
@@ -122,7 +126,7 @@ export default function Cloudflare() {
 				</div>
 				<div>
 					<p>Unity Relay</p>
-					<p>${unityCost()} /month</p>
+					<p>${unityCost().toFixed(2)} /month</p>
 					<p>${parseFloat((unityCost() * 12).toFixed(2))} /year</p>
 				</div>
 			</div>

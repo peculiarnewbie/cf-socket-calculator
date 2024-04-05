@@ -1,0 +1,76 @@
+@layer tokenami {
+  :root {
+    --_grid: .25rem;
+    --color_cf: #de7622;
+    --color_overlay: #3c3c46;
+    --radii_full: 9999px;
+    --shadow_cf: 0 0 0 5px #de762298;
+    --size_full: 100%;
+  }
+
+  [style] {
+    --border-radius: initial;
+    --hover: initial;
+    --hover_box-shadow: initial;
+    --focus: initial;
+    --focus_box-shadow: initial;
+    --display: initial;
+    --height: initial;
+    --focus_outline: initial;
+    --padding: initial;
+    --position: initial;
+    --touch-action: initial;
+    --user-select: initial;
+    --width: initial;
+    --background-color: initial;
+    --flex-direction: initial;
+    --top: initial;
+    --overflow-y: initial;
+    --padding-bottom: initial;
+    --justify-content: initial;
+    --align-items: initial;
+  }
+
+  @layer tk-0 {
+    [style] {
+      border-radius: var(--border-radius, revert-layer);
+      display: var(--display, revert-layer);
+      height: var(--height, revert-layer);
+      padding: var(--padding, revert-layer);
+      position: var(--position, revert-layer);
+      touch-action: var(--touch-action, revert-layer);
+      user-select: var(--user-select, revert-layer);
+      width: var(--width, revert-layer);
+    }
+  }
+
+  @layer tk-1 {
+    [style] {
+      background-color: var(--background-color, revert-layer);
+      flex-direction: var(--flex-direction, revert-layer);
+      top: var(--top, revert-layer);
+      overflow-y: var(--overflow-y, revert-layer);
+      padding-bottom: var(--padding-bottom, revert-layer);
+      justify-content: var(--justify-content, revert-layer);
+      align-items: var(--align-items, revert-layer);
+    }
+  }
+
+  @layer tk-selector-0 {
+    [style] {
+      box-shadow: var(--_4tqve6, var(--_16p7icu, revert-layer));
+      --_16p7icu: var(--hover) var(--hover_box-shadow);
+      --_4tqve6: var(--focus) var(--focus_box-shadow);
+      outline: var(--_11tc43a, revert-layer);
+      --_11tc43a: var(--focus) var(--focus_outline);
+    }
+  }
+
+  [style]:hover {
+    --hover: ;
+  }
+
+  [style]:focus {
+    --focus: ;
+  }
+}
